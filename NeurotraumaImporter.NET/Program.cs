@@ -26,6 +26,12 @@ if (!boardIdMatch.Success)
     return;
 }
 
+Console.WriteLine("Should the file be formatted with links for use in Obsidian? (Y/N)");
+if (Console.ReadLine() is not { } obsidianLine)
+    return;
+
+var obsidian = obsidianLine.Trim().Equals("Y", StringComparison.OrdinalIgnoreCase);
+
 Console.Clear();
 var board = new Board(boardIdMatch.Groups[1].Value, auth);
 await board.Refresh();
@@ -41,7 +47,8 @@ foreach (var list in board.Lists.Where(l => listNames.Contains(l.Name)).OrderBy(
     foreach (var card in list.Cards.OrderBy(c => c.Name))
     {
         var image = card.Attachments.Any() ? $"<img src=\"{card.Attachments[0].Url}\" height=32 width=32 class=\"valign-middle\">" : string.Empty;
-        var name = $"## {image} {card.Name} ^{NameToTag(card.Name)}";
+        var tag = obsidian ? $" ^{NameToTag(card.Name)}" : string.Empty;
+        var name = $"## {image} {card.Name}{tag}";
         var description = card.Description
             .Trim()
             .Replace("---", string.Empty)
@@ -51,7 +58,7 @@ foreach (var list in board.Lists.Where(l => listNames.Contains(l.Name)).OrderBy(
         {
             var link = match.Groups[1].Value.Replace("-", " ");
             link = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(link);
-            return $"[[#^{NameToTag(link)}|{link}]]";
+            return obsidian ? $"[[#^{NameToTag(link)}|{link}]]" : link;
         });
 
         description = spanRegex.Replace(description,
