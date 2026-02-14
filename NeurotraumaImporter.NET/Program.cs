@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using Manatee.Trello;
-using NeurotraumaImporter;
+using NeurotraumaImporter.NET;
 
 var auth = new TrelloAuthorization
 {
