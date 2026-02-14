@@ -15,7 +15,19 @@ var listNames = new[]
     "Procedures", "Items"
 };
 
-var board = new Board("lA0BSokX", auth);
+Console.WriteLine("Paste the link to Neurotrauma's Trello wiki and press Enter:");
+if (Console.ReadLine() is not { } link)
+    return;
+
+var boardIdMatch = Regexes.WikiRegex().Match(link);
+if (!boardIdMatch.Success)
+{
+    Console.WriteLine($"No board id found in link {link}");
+    return;
+}
+
+Console.Clear();
+var board = new Board(boardIdMatch.Groups[1].Value, auth);
 await board.Refresh();
 
 var cardText = new StringBuilder();
@@ -28,7 +40,6 @@ foreach (var list in board.Lists.Where(l => listNames.Contains(l.Name)).OrderBy(
     await list.Cards.Refresh();
     foreach (var card in list.Cards.OrderBy(c => c.Name))
     {
-        // var image = card.Attachments.Any() ? $"![[Neurotrauma/Images/{card.Name}.png|center|32x32]]" : string.Empty;
         var image = card.Attachments.Any() ? $"<img src=\"{card.Attachments[0].Url}\" height=32 width=32 class=\"valign-middle\">" : string.Empty;
         var name = $"## {image} {card.Name} ^{NameToTag(card.Name)}";
         var description = card.Description
